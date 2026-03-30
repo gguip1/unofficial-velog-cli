@@ -2,6 +2,9 @@ import typer
 
 from postflow.commands.init import init
 from postflow.commands.create import create
+from postflow.commands.list import list_posts
+from postflow.commands.check import check
+from postflow.commands.doctor import doctor
 
 app = typer.Typer(
     name="postflow",
@@ -11,6 +14,9 @@ app = typer.Typer(
 
 app.command(name="init")(init)
 app.command(name="create")(create)
+app.command(name="list")(list_posts)
+app.command(name="check")(check)
+app.command(name="doctor")(doctor)
 
 if __name__ == "__main__":
     app()

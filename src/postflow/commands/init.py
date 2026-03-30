@@ -39,13 +39,13 @@ def init(
     else:
         logger.info(f"글 디렉토리 확인: {config.posts_dir}/")
 
-    # registry.yaml 확인
-    registry_path = get_registry_path(root)
+    # posts/registry.yaml 확인
+    registry_path = get_registry_path(root, config.posts_dir)
     if not registry_path.exists():
         write_yaml(registry_path, {"posts": []})
-        logger.success("레지스트리 생성: registry.yaml")
+        logger.success("레지스트리 생성: posts/registry.yaml")
     else:
-        logger.info("레지스트리 확인: registry.yaml")
+        logger.info("레지스트리 확인: posts/registry.yaml")
 
     logger.success("PostFlow 초기화 완료!")
     logger.info("'postflow create'로 첫 번째 글을 만들어보세요.")
