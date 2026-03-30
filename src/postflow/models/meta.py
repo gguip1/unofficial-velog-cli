@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, field_validator
@@ -24,17 +23,10 @@ class Meta(BaseModel):
     status: PostStatus = PostStatus.draft
     visibility: Visibility = Visibility.public
     series: str | None = None
-    thumbnail: str | None = None
-    created_at: datetime
-    updated_at: datetime
 
     @field_validator("slug")
     @classmethod
     def validate_slug(cls, v: str) -> str:
-        import re
-
-        if not re.match(r"^[a-z0-9]+(?:-[a-z0-9]+)*$", v):
-            raise ValueError(
-                f"슬러그는 소문자, 숫자, 하이픈만 사용 가능합니다: '{v}'"
-            )
+        if not v or v != v.strip():
+            raise ValueError(f"슬러그가 비어있거나 공백이 포함되어 있습니다: '{v}'")
         return v

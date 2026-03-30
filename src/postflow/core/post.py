@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from pathlib import Path
 
 from postflow.models import Meta, PostStatus, RegistryEntry, Visibility
@@ -23,7 +22,6 @@ def create_post(
     if post_dir.exists():
         raise FileExistsError(f"이미 같은 슬러그의 디렉토리가 존재합니다: {slug}")
 
-    now = datetime.now(timezone.utc)
     post_id = generate_id()
 
     meta = Meta(
@@ -35,9 +33,6 @@ def create_post(
         status=PostStatus(config.settings.default_status),
         visibility=Visibility(visibility),
         series=series,
-        thumbnail=None,
-        created_at=now,
-        updated_at=now,
     )
 
     # 디렉토리 및 파일 생성
