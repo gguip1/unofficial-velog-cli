@@ -1,10 +1,13 @@
 import json
 from pathlib import Path
 
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Playwright
 
 POSTFLOW_DIR = Path.home() / ".postflow"
 AUTH_FILE = POSTFLOW_DIR / "velog-auth.json"
+
+# Chrome → Edge → Playwright Chromium 순으로 시도
+BROWSER_CHANNELS = ["chrome", "msedge", None]
 
 
 def get_auth_path() -> Path:
@@ -15,6 +18,19 @@ def auth_exists() -> bool:
     return AUTH_FILE.exists()
 
 
+async def _launch_browser(p: Playwright, headless: bool = False):
+    """사용 가능한 브라우저를 찾아서 실행한다."""
+    for channel in BROWSER_CHANNELS:
+        try:
+            return await p.chromium.launch(channel=channel, headless=headless)
+        except Exception:
+            continue
+    raise RuntimeError(
+        "사용 가능한 브라우저를 찾을 수 없습니다.\n"
+        "Chrome, Edge 중 하나를 설치하거나 'playwright install chromium'을 실행하세요."
+    )
+
+
 async def check_auth() -> bool:
     """저장된 세션이 유효한지 확인한다."""
     if not AUTH_FILE.exists():
@@ -22,12 +38,11 @@ async def check_auth() -> bool:
 
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await _launch_browser(p, headless=True)
             context = await browser.new_context(storage_state=str(AUTH_FILE))
             page = await context.new_page()
             await page.goto("https://velog.io", wait_until="domcontentloaded", timeout=15000)
 
-            # 로그인 상태 확인: 헤더의 사용자 메뉴 존재 여부
             try:
                 await page.wait_for_selector('button[data-testid="header-user-menu"]', timeout=5000)
                 await browser.close()
@@ -39,31 +54,33 @@ async def check_auth() -> bool:
         return False
 
 
-async def login() -> None:
-    """브라우저를 열어 사용자가 직접 로그인하도록 한다."""
+def login_with_token(access_token: str, refresh_token: str) -> None:
+    """사용자가 직접 복사한 토큰으로 세션을 저장한다."""
     POSTFLOW_DIR.mkdir(parents=True, exist_ok=True)
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context()
-        page = await context.new_page()
+    storage = {
+        "cookies": [
+            {
+                "name": "access_token",
+                "value": access_token,
+                "domain": ".velog.io",
+                "path": "/",
+                "httpOnly": True,
+                "secure": True,
+                "sameSite": "Lax",
+            },
+            {
+                "name": "refresh_token",
+                "value": refresh_token,
+                "domain": ".velog.io",
+                "path": "/",
+                "httpOnly": True,
+                "secure": True,
+                "sameSite": "Lax",
+            },
+        ],
+        "origins": [],
+    }
 
-        await page.goto("https://velog.io", wait_until="domcontentloaded")
-
-        # 사용자가 로그인할 때까지 대기
-        # 로그인 후 헤더에 사용자 메뉴 버튼이 나타남
-        try:
-            await page.wait_for_selector(
-                'button[data-testid="header-user-menu"]',
-                timeout=300000,  # 5분
-            )
-        except Exception:
-            await browser.close()
-            raise TimeoutError("로그인 시간이 초과되었습니다. 다시 시도하세요.")
-
-        # 세션 저장
-        storage = await context.storage_state()
-        with open(AUTH_FILE, "w", encoding="utf-8") as f:
-            json.dump(storage, f)
-
-        await browser.close()
+    with open(AUTH_FILE, "w", encoding="utf-8") as f:
+        json.dump(storage, f)

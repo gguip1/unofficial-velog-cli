@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
 
 from postflow.adapters.base import PostData, PublishAdapter, PublishResult
-from postflow.adapters.velog.auth import AUTH_FILE, auth_exists, check_auth, login
+from postflow.adapters.velog.auth import AUTH_FILE, _launch_browser, auth_exists, check_auth, login_with_token
 from postflow.adapters.velog.publisher import create_post, update_post
 
 
@@ -15,14 +15,14 @@ class VelogAdapter(PublishAdapter):
         return await check_auth()
 
     async def login(self) -> None:
-        await login()
+        raise NotImplementedError("VelogAdapter.login()은 사용하지 않습니다. 'postflow login'을 사용하세요.")
 
     async def create(self, post: PostData) -> PublishResult:
         if not auth_exists():
             return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await _launch_browser(p, headless=False)
             context = await browser.new_context(storage_state=str(AUTH_FILE))
             page = await context.new_page()
 
@@ -36,7 +36,7 @@ class VelogAdapter(PublishAdapter):
             return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await _launch_browser(p, headless=False)
             context = await browser.new_context(storage_state=str(AUTH_FILE))
             page = await context.new_page()
 

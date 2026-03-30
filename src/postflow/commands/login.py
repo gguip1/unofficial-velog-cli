@@ -1,8 +1,9 @@
 import asyncio
+import webbrowser
 
 import typer
 
-from postflow.adapters.velog.auth import auth_exists, check_auth, login
+from postflow.adapters.velog.auth import auth_exists, check_auth, login_with_token
 from postflow.utils import logger
 
 
@@ -17,15 +18,31 @@ def login_cmd() -> None:
             if not relogin:
                 return
 
-    logger.info("브라우저가 열립니다. Velog에 로그인해주세요.")
-    logger.info("로그인 완료 후 자동으로 세션이 저장됩니다.")
+    # 브라우저에서 Velog 열기
+    logger.info("브라우저에서 Velog를 엽니다. 로그인해주세요.")
+    webbrowser.open("https://velog.io")
 
-    try:
-        asyncio.run(login())
+    logger.info("")
+    logger.info("로그인 후 토큰을 복사해주세요:")
+    logger.info("  1. F12 (개발자 도구) 열기")
+    logger.info("  2. Application 탭 > Cookies > https://velog.io")
+    logger.info("  3. access_token 값 복사")
+    logger.info("  4. refresh_token 값 복사")
+    logger.info("")
+
+    access_token = typer.prompt("access_token").strip()
+    refresh_token = typer.prompt("refresh_token").strip()
+
+    if not access_token or not refresh_token:
+        logger.error("토큰이 비어있습니다.")
+        raise typer.Exit(1)
+
+    login_with_token(access_token, refresh_token)
+
+    # 저장된 토큰 검증
+    logger.info("토큰을 검증하는 중...")
+    is_valid = asyncio.run(check_auth())
+    if is_valid:
         logger.success("로그인 완료! 세션이 저장되었습니다.")
-    except TimeoutError:
-        logger.error("로그인 시간이 초과되었습니다. 다시 시도하세요.")
-        raise typer.Exit(1)
-    except Exception as e:
-        logger.error(f"로그인 실패: {e}")
-        raise typer.Exit(1)
+    else:
+        logger.warn("토큰이 저장되었지만 검증에 실패했습니다. 토큰 값을 다시 확인해주세요.")
