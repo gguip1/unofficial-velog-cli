@@ -11,7 +11,6 @@ class PostData:
     slug: str
     visibility: str
     series: str | None = None
-    thumbnail: str | None = None
 
 
 @dataclass

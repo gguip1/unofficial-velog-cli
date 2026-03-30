@@ -1,8 +1,6 @@
-from playwright.async_api import async_playwright
-
 from postflow.adapters.base import PostData, PublishAdapter, PublishResult
-from postflow.adapters.velog.auth import AUTH_FILE, _launch_browser, auth_exists, check_auth, login_with_token
-from postflow.adapters.velog.publisher import create_post, update_post
+from postflow.adapters.velog.api import get_current_user, write_post, edit_post
+from postflow.adapters.velog.auth import auth_exists, check_auth
 
 
 class VelogAdapter(PublishAdapter):
@@ -12,35 +10,56 @@ class VelogAdapter(PublishAdapter):
         return "velog"
 
     async def check_auth(self) -> bool:
-        return await check_auth()
+        return check_auth()
 
     async def login(self) -> None:
-        raise NotImplementedError("VelogAdapter.login()은 사용하지 않습니다. 'postflow login'을 사용하세요.")
+        raise NotImplementedError("'postflow login'을 사용하세요.")
 
     async def create(self, post: PostData) -> PublishResult:
         if not auth_exists():
             return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
 
-        async with async_playwright() as p:
-            browser = await _launch_browser(p, headless=False)
-            context = await browser.new_context(storage_state=str(AUTH_FILE))
-            page = await context.new_page()
+        try:
+            user = get_current_user()
+            username = user["username"] if user else ""
 
-            result = await create_post(page, post)
+            result = write_post(
+                title=post.title,
+                body=post.body,
+                tags=post.tags,
+                is_private=(post.visibility == "private"),
+                url_slug=post.slug,
+                description=post.description,
+            )
 
-            await browser.close()
-            return result
+            if result:
+                url = f"https://velog.io/@{username}/{result['url_slug']}"
+                return PublishResult(success=True, post_id=result["id"], url=url)
+            return PublishResult(success=False, error="발행 응답이 비어있습니다.")
+        except Exception as e:
+            return PublishResult(success=False, error=str(e))
 
     async def update(self, post_id: str, post: PostData) -> PublishResult:
         if not auth_exists():
             return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
 
-        async with async_playwright() as p:
-            browser = await _launch_browser(p, headless=False)
-            context = await browser.new_context(storage_state=str(AUTH_FILE))
-            page = await context.new_page()
+        try:
+            user = get_current_user()
+            username = user["username"] if user else ""
 
-            result = await update_post(page, post_id, post)
+            result = edit_post(
+                post_id=post_id,
+                title=post.title,
+                body=post.body,
+                tags=post.tags,
+                is_private=(post.visibility == "private"),
+                url_slug=post.slug,
+                description=post.description,
+            )
 
-            await browser.close()
-            return result
+            if result:
+                url = f"https://velog.io/@{username}/{result['url_slug']}"
+                return PublishResult(success=True, post_id=result["id"], url=url)
+            return PublishResult(success=False, error="수정 응답이 비어있습니다.")
+        except Exception as e:
+            return PublishResult(success=False, error=str(e))

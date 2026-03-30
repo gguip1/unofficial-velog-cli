@@ -12,5 +12,4 @@ def to_post_data(meta: Meta, content: str) -> PostData:
         slug=meta.slug,
         visibility=meta.visibility.value,
         series=meta.series,
-        thumbnail=meta.thumbnail,
     )
