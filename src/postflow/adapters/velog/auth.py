@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from urllib.request import Request, urlopen
 
 from playwright.async_api import async_playwright, Playwright
 
@@ -31,25 +32,34 @@ async def _launch_browser(p: Playwright, headless: bool = False):
     )
 
 
-async def check_auth() -> bool:
-    """저장된 세션이 유효한지 확인한다."""
+def check_auth() -> bool:
+    """저장된 토큰이 유효한지 Velog GraphQL API로 확인한다."""
     if not AUTH_FILE.exists():
         return False
 
     try:
-        async with async_playwright() as p:
-            browser = await _launch_browser(p, headless=True)
-            context = await browser.new_context(storage_state=str(AUTH_FILE))
-            page = await context.new_page()
-            await page.goto("https://velog.io", wait_until="domcontentloaded", timeout=15000)
+        with open(AUTH_FILE, encoding="utf-8") as f:
+            storage = json.load(f)
 
-            try:
-                await page.wait_for_selector('button[data-testid="header-user-menu"]', timeout=5000)
-                await browser.close()
-                return True
-            except Exception:
-                await browser.close()
-                return False
+        cookies = {c["name"]: c["value"] for c in storage.get("cookies", [])}
+        access_token = cookies.get("access_token", "")
+        if not access_token:
+            return False
+
+        # 현재 사용자 정보를 요청해서 인증 여부 확인
+        query = json.dumps({"query": "{ currentUser { id username } }"}).encode()
+        req = Request(
+            "https://v3.velog.io/graphql",
+            data=query,
+            headers={
+                "Content-Type": "application/json",
+                "Cookie": f"access_token={access_token}",
+            },
+        )
+        with urlopen(req, timeout=10) as resp:
+            result = json.loads(resp.read())
+            user = result.get("data", {}).get("currentUser")
+            return user is not None
     except Exception:
         return False
 

@@ -37,22 +37,11 @@ def publish(
     meta, content = read_post(root, entry.slug)
 
     # 인증 확인
+    from postflow.adapters.velog.auth import check_auth
     adapter = VelogAdapter()
-    is_authed = asyncio.run(adapter.check_auth())
-    if not is_authed:
-        logger.warn("Velog에 로그인되어 있지 않습니다.")
-        do_login = typer.confirm("지금 로그인할까요?", default=True)
-        if do_login:
-            logger.info("브라우저가 열립니다. Velog에 로그인해주세요.")
-            try:
-                asyncio.run(adapter.login())
-                logger.success("로그인 완료!")
-            except Exception as e:
-                logger.error(f"로그인 실패: {e}")
-                raise typer.Exit(1)
-        else:
-            logger.error("로그인 없이는 발행할 수 없습니다.")
-            raise typer.Exit(1)
+    if not check_auth():
+        logger.error("Velog에 로그인되어 있지 않습니다. 'postflow login'을 먼저 실행하세요.")
+        raise typer.Exit(1)
 
     # 발행 데이터 준비
     post_data = to_post_data(meta, content)

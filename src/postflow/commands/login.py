@@ -1,4 +1,3 @@
-import asyncio
 import webbrowser
 
 import typer
@@ -11,8 +10,7 @@ def login_cmd() -> None:
     """Velog에 로그인합니다."""
     if auth_exists():
         logger.info("기존 세션이 있습니다. 유효한지 확인 중...")
-        is_valid = asyncio.run(check_auth())
-        if is_valid:
+        if check_auth():
             logger.success("이미 로그인되어 있습니다.")
             relogin = typer.confirm("다시 로그인할까요?", default=False)
             if not relogin:
@@ -41,8 +39,7 @@ def login_cmd() -> None:
 
     # 저장된 토큰 검증
     logger.info("토큰을 검증하는 중...")
-    is_valid = asyncio.run(check_auth())
-    if is_valid:
+    if check_auth():
         logger.success("로그인 완료! 세션이 저장되었습니다.")
     else:
         logger.warn("토큰이 저장되었지만 검증에 실패했습니다. 토큰 값을 다시 확인해주세요.")
