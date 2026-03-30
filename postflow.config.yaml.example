@@ -1,0 +1,9 @@
+version: 1
+posts_dir: "posts"
+
+velog:
+  username: "your-velog-username"
+
+settings:
+  default_visibility: "public"
+  default_status: "draft"
