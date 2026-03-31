@@ -16,20 +16,53 @@ from postflow.utils import logger
 from postflow.utils.paths import find_project_root
 
 
-def _restore_image_urls(content: str, post_dir) -> str:
-    """로컬 이미지 경로를 원본 URL로 되돌린다."""
+def _process_images(content: str, post_dir) -> str:
+    """로컬 이미지를 처리한다.
+    - mapping.json에 있는 이미지: 원본 URL로 복원
+    - mapping.json에 없는 로컬 이미지: Velog에 업로드 후 URL 치환
+    """
+    import re
     import json
     from pathlib import Path
+    from postflow.adapters.velog.api import upload_image
 
-    mapping_path = Path(post_dir) / "images" / "mapping.json"
-    if not mapping_path.exists():
-        return content
+    post_dir = Path(post_dir)
+    images_dir = post_dir / "images"
 
-    with open(mapping_path, encoding="utf-8") as f:
-        mapping = json.load(f)
+    # 기존 매핑 로드
+    mapping_path = images_dir / "mapping.json"
+    if mapping_path.exists():
+        with open(mapping_path, encoding="utf-8") as f:
+            mapping = json.load(f)
+    else:
+        mapping = {}
 
+    # mapping에 있는 이미지는 원본 URL로 복원
     for local_ref, original_url in mapping.items():
         content = content.replace(local_ref, original_url)
+
+    # 아직 로컬 경로로 남아있는 이미지 찾기 (새로 추가된 이미지)
+    local_refs = re.findall(r'!\[[^\]]*\]\((\.\/images\/[^)]+)\)', content)
+
+    for local_ref in local_refs:
+        image_path = post_dir / local_ref.lstrip("./")
+        if not image_path.exists():
+            continue
+
+        try:
+            logger.info(f"    이미지 업로드: {image_path.name}")
+            url = upload_image(image_path)
+            content = content.replace(local_ref, url)
+            # 매핑에 추가
+            mapping[local_ref] = url
+        except Exception as e:
+            logger.warn(f"    이미지 업로드 실패: {image_path.name} ({e})")
+
+    # 매핑 저장
+    if mapping:
+        images_dir.mkdir(exist_ok=True)
+        with open(mapping_path, "w", encoding="utf-8") as f:
+            json.dump(mapping, f, indent=2)
 
     return content
 
@@ -51,7 +84,7 @@ def _publish_entry(root, entry: RegistryEntry, adapter: VelogAdapter) -> bool:
     from postflow.utils.paths import get_posts_dir
     config = load_config(root)
     post_dir = get_posts_dir(root, config.posts_dir) / entry.slug
-    content = _restore_image_urls(content, post_dir)
+    content = _process_images(content, post_dir)
 
     post_data = to_post_data(meta, content)
 

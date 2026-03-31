@@ -138,3 +138,52 @@ def edit_post(
     if "errors" in result:
         raise RuntimeError(result["errors"][0].get("message", str(result["errors"])))
     return result.get("data", {}).get("editPost")
+
+
+def upload_image(file_path: Path) -> str:
+    """이미지를 Velog에 업로드하고 URL을 반환한다.
+    1. create-url로 S3 signed URL을 받는다
+    2. signed URL에 이미지를 PUT으로 업로드한다
+    3. image_path(최종 URL)를 반환한다
+    """
+    import mimetypes
+
+    access_token = _get_access_token()
+    filename = file_path.name
+    content_type = mimetypes.guess_type(filename)[0] or "image/png"
+
+    # 1단계: signed URL 요청
+    create_req = Request(
+        "https://v2.velog.io/api/v2/files/create-url",
+        data=json.dumps({"type": "post", "filename": filename}).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "Cookie": f"access_token={access_token}",
+        },
+    )
+    try:
+        with urlopen(create_req, timeout=15) as resp:
+            result = json.loads(resp.read())
+    except Exception as e:
+        raise ConnectionError(f"이미지 업로드 URL 요청 실패: {e}")
+
+    signed_url = result.get("signed_url")
+    image_path = result.get("image_path")
+    if not signed_url or not image_path:
+        raise RuntimeError("이미지 업로드 URL을 받지 못했습니다.")
+
+    # 2단계: S3에 이미지 업로드
+    image_data = file_path.read_bytes()
+    put_req = Request(
+        signed_url,
+        data=image_data,
+        headers={"Content-Type": content_type},
+        method="PUT",
+    )
+    try:
+        with urlopen(put_req, timeout=30) as resp:
+            pass
+    except Exception as e:
+        raise ConnectionError(f"이미지 업로드 실패: {e}")
+
+    return image_path
