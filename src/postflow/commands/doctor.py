@@ -1,5 +1,4 @@
 import shutil
-import subprocess
 import sys
 
 import typer
@@ -54,41 +53,15 @@ def doctor() -> None:
         logger.error("글 디렉토리 없음 - 'postflow init'을 실행하세요")
         all_ok = False
 
-    # Playwright
-    try:
-        result = subprocess.run(
-            [sys.executable, "-c", "from playwright.sync_api import sync_playwright"],
-            capture_output=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            logger.success("Playwright: 설치됨")
+    # Velog 인증 상태
+    from postflow.adapters.velog.auth import check_auth, auth_exists
+    if auth_exists():
+        if check_auth():
+            logger.success("Velog 인증: 유효")
         else:
-            logger.warn("Playwright: 모듈은 있으나 문제 발생")
-            all_ok = False
-    except Exception:
-        logger.error("Playwright: 설치되지 않음 - 'pip install playwright'")
-        all_ok = False
-
-    # Playwright 브라우저
-    playwright_path = shutil.which("playwright")
-    if playwright_path:
-        try:
-            result = subprocess.run(
-                ["playwright", "install", "--dry-run", "chromium"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-            if result.returncode == 0:
-                logger.success("Playwright 브라우저: chromium")
-            else:
-                logger.warn("Playwright 브라우저 미설치 - 'playwright install chromium'을 실행하세요")
-                all_ok = False
-        except Exception:
-            logger.warn("Playwright 브라우저 확인 불가")
+            logger.warn("Velog 인증: 토큰 만료 - 'postflow login'을 실행하세요")
     else:
-        logger.warn("Playwright CLI를 찾을 수 없음 - 'playwright install chromium'을 실행하세요")
+        logger.info("Velog 인증: 미로그인 - 'postflow login'을 실행하세요")
 
     # gh CLI
     if shutil.which("gh"):

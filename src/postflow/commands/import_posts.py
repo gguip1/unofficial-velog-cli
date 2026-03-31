@@ -210,11 +210,6 @@ def sync_posts() -> None:
         else:
             # 새 글 가져오기
             post_dir = posts_dir / slug
-            if post_dir.exists():
-                logger.info(f"  건너뜀 (디렉토리 존재): {slug}")
-                skipped += 1
-                continue
-
             post_id = generate_id()
             released = post.get("released_at")
             published_at = None
@@ -236,7 +231,8 @@ def sync_posts() -> None:
                 series=series_name,
             )
 
-            post_dir.mkdir(parents=True)
+            if not post_dir.exists():
+                post_dir.mkdir(parents=True)
 
             body = post.get("body", "") or ""
             body = _download_images(body, post_dir)

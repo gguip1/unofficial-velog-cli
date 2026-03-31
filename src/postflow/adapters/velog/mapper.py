@@ -1,4 +1,4 @@
-from postflow.adapters.base import PostData
+from postflow.adapters.velog.adapter import PostData
 from postflow.models import Meta
 
 

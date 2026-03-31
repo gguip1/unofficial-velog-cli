@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -58,10 +57,10 @@ def _publish_entry(root, entry: RegistryEntry, adapter: VelogAdapter) -> bool:
     # 신규 vs 수정 판단
     if entry.provider and entry.provider.post_id:
         logger.info(f"  수정: {meta.title}")
-        result = asyncio.run(adapter.update(entry.provider.post_id, post_data))
+        result = adapter.update(entry.provider.post_id, post_data)
     else:
         logger.info(f"  발행: {meta.title}")
-        result = asyncio.run(adapter.create(post_data))
+        result = adapter.create(post_data)
 
     if result.success:
         logger.success(f"  완료: {result.url}")

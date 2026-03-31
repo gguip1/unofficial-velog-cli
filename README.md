@@ -98,7 +98,7 @@ postflow check my-post
 postflow doctor
 ```
 
-Python 버전, 설정 파일, Playwright, 인증 상태 등을 점검합니다.
+Python 버전, 설정 파일, Velog 인증 상태 등을 점검합니다.
 
 ### 로그아웃
 
