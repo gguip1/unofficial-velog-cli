@@ -41,9 +41,9 @@ def create_post(
 
     template_path = root / "templates" / "content.md"
     if template_path.exists():
-        content = read_text(template_path).replace("# 제목", f"# {title}")
+        content = read_text(template_path)
     else:
-        content = f"# {title}\n\n여기에 글을 작성하세요.\n"
+        content = "여기에 글을 작성하세요.\n"
     write_text(post_dir / "content.md", content)
 
     # 레지스트리에 등록
