@@ -78,6 +78,8 @@ postflow publish
 postflow publish --slug my-post
 ```
 
+글에 포함된 로컬 이미지(`./images/...`)는 발행 시 자동으로 Velog에 업로드됩니다.
+
 ### 글 목록 보기
 
 ```bash
