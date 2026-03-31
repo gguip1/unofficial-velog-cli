@@ -5,6 +5,10 @@ from postflow.commands.create import create
 from postflow.commands.list import list_posts
 from postflow.commands.check import check
 from postflow.commands.doctor import doctor
+from postflow.commands.login import login_cmd
+from postflow.commands.logout import logout
+from postflow.commands.publish import publish
+from postflow.commands.import_posts import sync_posts
 
 app = typer.Typer(
     name="postflow",
@@ -17,6 +21,10 @@ app.command(name="create")(create)
 app.command(name="list")(list_posts)
 app.command(name="check")(check)
 app.command(name="doctor")(doctor)
+app.command(name="login")(login_cmd)
+app.command(name="logout")(logout)
+app.command(name="publish")(publish)
+app.command(name="sync")(sync_posts)
 
 if __name__ == "__main__":
     app()

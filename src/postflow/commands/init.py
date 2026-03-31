@@ -29,7 +29,7 @@ def init(
     config = Config()
     config.velog.username = username
     save_config(root, config)
-    logger.success(f"설정 파일 생성: postflow.config.yaml")
+    logger.success(f"설정 파일 생성: config/postflow.yaml")
 
     # posts 디렉토리 확인
     posts_dir = get_posts_dir(root, config.posts_dir)

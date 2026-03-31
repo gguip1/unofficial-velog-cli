@@ -22,13 +22,13 @@ def doctor() -> None:
         logger.error(f"Python {ver.major}.{ver.minor}.{ver.micro} (3.12 이상 필요)")
         all_ok = False
 
-    # postflow.config.yaml
+    # config/postflow.yaml
     if config_exists(root):
         config = load_config(root)
         if config.velog.username:
-            logger.success(f"설정 파일: postflow.config.yaml (velog: {config.velog.username})")
+            logger.success(f"설정 파일: config/postflow.yaml (velog: {config.velog.username})")
         else:
-            logger.warn("설정 파일: postflow.config.yaml (velog username이 비어있음)")
+            logger.warn("설정 파일: config/postflow.yaml (velog username이 비어있음)")
             all_ok = False
     else:
         logger.error("설정 파일 없음 - 'postflow init'을 실행하세요")
