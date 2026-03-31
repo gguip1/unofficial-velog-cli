@@ -1,4 +1,5 @@
 import json
+import urllib.error
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -28,8 +29,22 @@ def _graphql(query: str, variables: dict | None = None) -> dict:
             "Cookie": f"access_token={access_token}",
         },
     )
-    with urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+    try:
+        with urlopen(req, timeout=30) as resp:
+            body = resp.read()
+            if not body:
+                return {}
+            return json.loads(body)
+    except urllib.error.URLError as e:
+        raise ConnectionError(
+            f"Velog API에 연결할 수 없습니다. 네트워크 상태를 확인하세요.\n원인: {e}"
+        )
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            raise PermissionError(
+                "인증이 만료되었습니다. 'postflow login'으로 다시 로그인하세요."
+            )
+        raise ConnectionError(f"Velog API 오류 (HTTP {e.code}): {e.reason}")
 
 
 def get_current_user() -> dict | None:

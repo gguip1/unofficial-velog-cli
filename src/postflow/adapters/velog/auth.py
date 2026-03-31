@@ -2,13 +2,8 @@ import json
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-from playwright.async_api import async_playwright, Playwright
-
 POSTFLOW_DIR = Path.home() / ".postflow"
 AUTH_FILE = POSTFLOW_DIR / "velog-auth.json"
-
-# Chrome → Edge → Playwright Chromium 순으로 시도
-BROWSER_CHANNELS = ["chrome", "msedge", None]
 
 
 def get_auth_path() -> Path:
@@ -17,19 +12,6 @@ def get_auth_path() -> Path:
 
 def auth_exists() -> bool:
     return AUTH_FILE.exists()
-
-
-async def _launch_browser(p: Playwright, headless: bool = False):
-    """사용 가능한 브라우저를 찾아서 실행한다."""
-    for channel in BROWSER_CHANNELS:
-        try:
-            return await p.chromium.launch(channel=channel, headless=headless)
-        except Exception:
-            continue
-    raise RuntimeError(
-        "사용 가능한 브라우저를 찾을 수 없습니다.\n"
-        "Chrome, Edge 중 하나를 설치하거나 'playwright install chromium'을 실행하세요."
-    )
 
 
 def check_auth() -> bool:
@@ -46,7 +28,6 @@ def check_auth() -> bool:
         if not access_token:
             return False
 
-        # 현재 사용자 정보를 요청해서 인증 여부 확인
         query = json.dumps({"query": "{ currentUser { id username } }"}).encode()
         req = Request(
             "https://v3.velog.io/graphql",
