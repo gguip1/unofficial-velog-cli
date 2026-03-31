@@ -1,6 +1,9 @@
 # 사용자 설정 (포크 후 init으로 생성)
 config/postflow.yaml
 
+# 사용자 글 (포크한 저장소에서만 관리)
+posts/
+
 # Python
 __pycache__/
 *.pyc
