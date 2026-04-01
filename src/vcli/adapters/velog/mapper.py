@@ -1,9 +1,9 @@
-from postflow.adapters.velog.adapter import PostData
-from postflow.models import Meta
+from vcli.adapters.velog.adapter import PostData
+from vcli.models import Meta
 
 
 def to_post_data(meta: Meta, content: str) -> PostData:
-    """PostFlow의 Meta + content를 어댑터용 PostData로 변환한다."""
+    """Meta + content를 Velog 발행용 PostData로 변환한다."""
     return PostData(
         title=meta.title,
         body=content,

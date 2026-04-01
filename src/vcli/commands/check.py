@@ -1,8 +1,8 @@
 import typer
 
-from postflow.core.validator import validate_all, validate_post
-from postflow.utils import logger
-from postflow.utils.paths import find_project_root
+from vcli.core.validator import validate_all, validate_post
+from vcli.utils import logger
+from vcli.utils.paths import find_project_root
 
 
 def check(

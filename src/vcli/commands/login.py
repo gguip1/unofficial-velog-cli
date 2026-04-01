@@ -2,8 +2,8 @@ import webbrowser
 
 import typer
 
-from postflow.adapters.velog.auth import auth_exists, check_auth, login_with_token
-from postflow.utils import logger
+from vcli.adapters.velog.auth import auth_exists, check_auth, login_with_token
+from vcli.utils import logger
 
 
 def login_cmd() -> None:

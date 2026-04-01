@@ -3,9 +3,9 @@ import sys
 
 import typer
 
-from postflow.core.config import config_exists, load_config
-from postflow.utils import logger
-from postflow.utils.paths import find_project_root, get_posts_dir, get_registry_path
+from vcli.core.config import config_exists, load_config
+from vcli.utils import logger
+from vcli.utils.paths import find_project_root, get_posts_dir, get_registry_path
 
 
 def doctor() -> None:
@@ -21,16 +21,16 @@ def doctor() -> None:
         logger.error(f"Python {ver.major}.{ver.minor}.{ver.micro} (3.12 이상 필요)")
         all_ok = False
 
-    # config/postflow.yaml
+    # config/vcli.yaml
     if config_exists(root):
         config = load_config(root)
         if config.velog.username:
-            logger.success(f"설정 파일: config/postflow.yaml (velog: {config.velog.username})")
+            logger.success(f"설정 파일: config/vcli.yaml (velog: {config.velog.username})")
         else:
-            logger.warn("설정 파일: config/postflow.yaml (velog username이 비어있음)")
+            logger.warn("설정 파일: config/vcli.yaml (velog username이 비어있음)")
             all_ok = False
     else:
-        logger.error("설정 파일 없음 - 'postflow init'을 실행하세요")
+        logger.error("설정 파일 없음 - 'vcli init'을 실행하세요")
         all_ok = False
 
     # posts/registry.yaml
@@ -38,7 +38,7 @@ def doctor() -> None:
     if registry_path.exists():
         logger.success("레지스트리: posts/registry.yaml")
     else:
-        logger.error("레지스트리 없음 - 'postflow init'을 실행하세요")
+        logger.error("레지스트리 없음 - 'vcli init'을 실행하세요")
         all_ok = False
 
     # posts 디렉토리
@@ -50,18 +50,18 @@ def doctor() -> None:
         )
         logger.success(f"글 디렉토리: posts/ ({post_count}개 글)")
     else:
-        logger.error("글 디렉토리 없음 - 'postflow init'을 실행하세요")
+        logger.error("글 디렉토리 없음 - 'vcli init'을 실행하세요")
         all_ok = False
 
     # Velog 인증 상태
-    from postflow.adapters.velog.auth import check_auth, auth_exists
+    from vcli.adapters.velog.auth import check_auth, auth_exists
     if auth_exists():
         if check_auth():
             logger.success("Velog 인증: 유효")
         else:
-            logger.warn("Velog 인증: 토큰 만료 - 'postflow login'을 실행하세요")
+            logger.warn("Velog 인증: 토큰 만료 - 'vcli login'을 실행하세요")
     else:
-        logger.info("Velog 인증: 미로그인 - 'postflow login'을 실행하세요")
+        logger.info("Velog 인증: 미로그인 - 'vcli login'을 실행하세요")
 
     # gh CLI
     if shutil.which("gh"):

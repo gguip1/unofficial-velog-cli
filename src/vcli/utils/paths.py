@@ -1,12 +1,12 @@
 from pathlib import Path
 
 CONFIG_DIR = "config"
-CONFIG_FILENAME = "postflow.yaml"
+CONFIG_FILENAME = "vcli.yaml"
 REGISTRY_FILENAME = "registry.yaml"
 
 
 def find_project_root(start: Path | None = None) -> Path:
-    """config/postflow.yaml 또는 posts/registry.yaml이 있는 디렉토리를 찾는다."""
+    """config/vcli.yaml 또는 posts/registry.yaml이 있는 디렉토리를 찾는다."""
     current = start or Path.cwd()
 
     for parent in [current, *current.parents]:

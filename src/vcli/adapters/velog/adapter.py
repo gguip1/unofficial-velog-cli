@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from postflow.adapters.velog.api import get_current_user, write_post, edit_post
-from postflow.adapters.velog.auth import auth_exists, check_auth
+from vcli.adapters.velog.api import get_current_user, write_post, edit_post
+from vcli.adapters.velog.auth import auth_exists, check_auth
 
 
 @dataclass
@@ -27,7 +27,7 @@ class VelogAdapter:
 
     def create(self, post: PostData) -> PublishResult:
         if not auth_exists():
-            return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
+            return PublishResult(success=False, error="로그인이 필요합니다. 'vcli login'을 실행하세요.")
 
         try:
             user = get_current_user()
@@ -51,7 +51,7 @@ class VelogAdapter:
 
     def update(self, post_id: str, post: PostData) -> PublishResult:
         if not auth_exists():
-            return PublishResult(success=False, error="로그인이 필요합니다. 'postflow login'을 실행하세요.")
+            return PublishResult(success=False, error="로그인이 필요합니다. 'vcli login'을 실행하세요.")
 
         try:
             user = get_current_user()

@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "postflow"
+name = "unofficial-velog-cli"
 version = "0.1.0"
 description = "Markdown으로 Velog 글을 관리하고 발행하는 CLI 도구"
 readme = "README.md"
@@ -24,7 +24,7 @@ dev = [
 ]
 
 [project.scripts]
-postflow = "postflow.main:app"
+vcli = "vcli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]

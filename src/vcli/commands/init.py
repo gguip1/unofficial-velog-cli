@@ -2,11 +2,11 @@ from pathlib import Path
 
 import typer
 
-from postflow.core.config import config_exists, save_config
-from postflow.models import Config
-from postflow.utils import logger
-from postflow.utils.fs import write_yaml
-from postflow.utils.paths import get_posts_dir, get_registry_path
+from vcli.core.config import config_exists, save_config
+from vcli.models import Config
+from vcli.utils import logger
+from vcli.utils.fs import write_yaml
+from vcli.utils.paths import get_posts_dir, get_registry_path
 
 
 def init(
@@ -14,7 +14,7 @@ def init(
         ".", "--path", "-p", help="프로젝트 경로 (기본: 현재 디렉토리)"
     ),
 ) -> None:
-    """PostFlow 프로젝트를 초기화합니다."""
+    """프로젝트를 초기화합니다."""
     root = path.resolve()
 
     if config_exists(root):
@@ -29,7 +29,7 @@ def init(
     config = Config()
     config.velog.username = username
     save_config(root, config)
-    logger.success(f"설정 파일 생성: config/postflow.yaml")
+    logger.success(f"설정 파일 생성: config/vcli.yaml")
 
     # posts 디렉토리 확인
     posts_dir = get_posts_dir(root, config.posts_dir)
@@ -47,5 +47,5 @@ def init(
     else:
         logger.info("레지스트리 확인: posts/registry.yaml")
 
-    logger.success("PostFlow 초기화 완료!")
-    logger.info("'postflow create'로 첫 번째 글을 만들어보세요.")
+    logger.success("초기화 완료!")
+    logger.info("'vcli create'로 첫 번째 글을 만들어보세요.")

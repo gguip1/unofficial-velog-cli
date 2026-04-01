@@ -4,15 +4,15 @@ from typing import Optional
 import typer
 from InquirerPy import inquirer
 
-from postflow.adapters.velog.adapter import VelogAdapter
-from postflow.adapters.velog.auth import check_auth
-from postflow.adapters.velog.mapper import to_post_data
-from postflow.core.post import read_post
-from postflow.core.registry import find_entry, load_registry, update_entry
-from postflow.core.validator import validate_post
-from postflow.models import PostStatus, ProviderInfo, RegistryEntry
-from postflow.utils import logger
-from postflow.utils.paths import find_project_root
+from vcli.adapters.velog.adapter import VelogAdapter
+from vcli.adapters.velog.auth import check_auth
+from vcli.adapters.velog.mapper import to_post_data
+from vcli.core.post import read_post
+from vcli.core.registry import find_entry, load_registry, update_entry
+from vcli.core.validator import validate_post
+from vcli.models import PostStatus, ProviderInfo, RegistryEntry
+from vcli.utils import logger
+from vcli.utils.paths import find_project_root
 
 
 def _restore_image_urls(content: str, post_dir) -> str:
@@ -46,8 +46,8 @@ def _publish_entry(root, entry: RegistryEntry, adapter: VelogAdapter) -> bool:
     meta, content = read_post(root, entry.slug)
 
     # 로컬 이미지 경로를 원본 URL로 되돌리기
-    from postflow.core.config import load_config
-    from postflow.utils.paths import get_posts_dir
+    from vcli.core.config import load_config
+    from vcli.utils.paths import get_posts_dir
     config = load_config(root)
     post_dir = get_posts_dir(root, config.posts_dir) / entry.slug
     content = _restore_image_urls(content, post_dir)
@@ -89,7 +89,7 @@ def publish(
 
     # 인증 확인
     if not check_auth():
-        logger.error("Velog에 로그인되어 있지 않습니다. 'postflow login'을 먼저 실행하세요.")
+        logger.error("Velog에 로그인되어 있지 않습니다. 'vcli login'을 먼저 실행하세요.")
         raise typer.Exit(1)
 
     adapter = VelogAdapter()
@@ -111,9 +111,9 @@ def publish(
         raise typer.Exit()
 
     # 변경된 글만 필터링
-    from postflow.utils.fs import read_yaml
-    from postflow.utils.paths import get_posts_dir
-    from postflow.core.config import load_config
+    from vcli.utils.fs import read_yaml
+    from vcli.utils.paths import get_posts_dir
+    from vcli.core.config import load_config
     from datetime import datetime
 
     config = load_config(root)

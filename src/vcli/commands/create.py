@@ -3,9 +3,9 @@ from pathlib import Path
 
 import typer
 
-from postflow.core.post import create_post
-from postflow.utils import logger
-from postflow.utils.paths import find_project_root
+from vcli.core.post import create_post
+from vcli.utils import logger
+from vcli.utils.paths import find_project_root
 
 
 def _slugify(text: str) -> str:

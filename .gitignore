@@ -1,5 +1,5 @@
 # 사용자 설정 (포크 후 init으로 생성)
-config/postflow.yaml
+config/vcli.yaml
 
 # Python
 __pycache__/

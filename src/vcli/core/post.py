@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from postflow.models import Meta, PostStatus, RegistryEntry, Visibility
-from postflow.core.config import load_config
-from postflow.core.registry import add_entry
-from postflow.utils.fs import read_yaml, write_yaml, read_text, write_text
-from postflow.utils.id import generate_id
-from postflow.utils.paths import get_post_dir, get_posts_dir
+from vcli.models import Meta, PostStatus, RegistryEntry, Visibility
+from vcli.core.config import load_config
+from vcli.core.registry import add_entry
+from vcli.utils.fs import read_yaml, write_yaml, read_text, write_text
+from vcli.utils.id import generate_id
+from vcli.utils.paths import get_post_dir, get_posts_dir
 
 
 def create_post(
