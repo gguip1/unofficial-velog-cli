@@ -2,11 +2,11 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from postflow.core.config import load_config
-from postflow.core.registry import load_registry
-from postflow.models import Meta
-from postflow.utils.fs import read_yaml
-from postflow.utils.paths import get_posts_dir
+from vcli.core.config import load_config
+from vcli.core.registry import load_registry
+from vcli.models import Meta
+from vcli.utils.fs import read_yaml
+from vcli.utils.paths import get_posts_dir
 
 
 class CheckResult:

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from postflow.models.meta import PostStatus, Visibility
+from vcli.models.meta import PostStatus, Visibility
 
 
 class ProviderInfo(BaseModel):

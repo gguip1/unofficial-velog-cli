@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-POSTFLOW_DIR = Path.home() / ".postflow"
-AUTH_FILE = POSTFLOW_DIR / "velog-auth.json"
+VCLI_DIR = Path.home() / ".vcli"
+AUTH_FILE = VCLI_DIR / "velog-auth.json"
 
 
 def get_auth_path() -> Path:
@@ -47,7 +47,7 @@ def check_auth() -> bool:
 
 def login_with_token(access_token: str, refresh_token: str) -> None:
     """사용자가 직접 복사한 토큰으로 세션을 저장한다."""
-    POSTFLOW_DIR.mkdir(parents=True, exist_ok=True)
+    VCLI_DIR.mkdir(parents=True, exist_ok=True)
 
     storage = {
         "cookies": [

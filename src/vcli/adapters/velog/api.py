@@ -3,7 +3,7 @@ import urllib.error
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-from postflow.adapters.velog.auth import AUTH_FILE
+from vcli.adapters.velog.auth import AUTH_FILE
 
 VELOG_GRAPHQL = "https://v3.velog.io/graphql"
 
@@ -42,7 +42,7 @@ def _graphql(query: str, variables: dict | None = None) -> dict:
     except urllib.error.HTTPError as e:
         if e.code == 401:
             raise PermissionError(
-                "인증이 만료되었습니다. 'postflow login'으로 다시 로그인하세요."
+                "인증이 만료되었습니다. 'vcli login'으로 다시 로그인하세요."
             )
         raise ConnectionError(f"Velog API 오류 (HTTP {e.code}): {e.reason}")
 

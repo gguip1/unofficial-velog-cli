@@ -2,8 +2,8 @@ import shutil
 
 import typer
 
-from postflow.adapters.velog.auth import POSTFLOW_DIR, auth_exists
-from postflow.utils import logger
+from vcli.adapters.velog.auth import VCLI_DIR, auth_exists
+from vcli.utils import logger
 
 
 def logout() -> None:
@@ -13,11 +13,11 @@ def logout() -> None:
         return
 
     confirm = typer.confirm(
-        f"세션 데이터를 삭제합니다 ({POSTFLOW_DIR}). 계속할까요?",
+        f"세션 데이터를 삭제합니다 ({VCLI_DIR}). 계속할까요?",
         default=True,
     )
     if not confirm:
         return
 
-    shutil.rmtree(POSTFLOW_DIR)
+    shutil.rmtree(VCLI_DIR)
     logger.success("세션이 삭제되었습니다.")

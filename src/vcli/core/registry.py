@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from postflow.models import Registry, RegistryEntry
-from postflow.utils.fs import read_yaml, write_yaml
-from postflow.utils.paths import get_registry_path
+from vcli.models import Registry, RegistryEntry
+from vcli.utils.fs import read_yaml, write_yaml
+from vcli.utils.paths import get_registry_path
 
 
 def load_registry(root: Path) -> Registry:

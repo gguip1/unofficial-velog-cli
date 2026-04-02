@@ -1,9 +1,9 @@
 import typer
 from rich.table import Table
 
-from postflow.core.registry import load_registry
-from postflow.utils.logger import console
-from postflow.utils.paths import find_project_root
+from vcli.core.registry import load_registry
+from vcli.utils.logger import console
+from vcli.utils.paths import find_project_root
 
 
 def list_posts(
@@ -21,7 +21,7 @@ def list_posts(
         if status:
             console.print(f"상태가 '{status}'인 글이 없습니다.")
         else:
-            console.print("등록된 글이 없습니다. 'postflow create'로 글을 만들어보세요.")
+            console.print("등록된 글이 없습니다. 'vcli create'로 글을 만들어보세요.")
         return
 
     table = Table(title=f"글 목록 (총 {len(posts)}개)")

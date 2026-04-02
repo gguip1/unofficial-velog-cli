@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "postflow"
+name = "unofficial-velog-cli"
 version = "0.1.0"
-description = "Git 기반 마크다운 콘텐츠 퍼블리싱 도구"
+description = "Markdown으로 Velog 글을 관리하고 발행하는 CLI 도구"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -14,7 +14,6 @@ dependencies = [
     "pydantic>=2.0.0",
     "pyyaml>=6.0.0",
     "nanoid>=2.0.0",
-    "playwright>=1.40.0",
     "InquirerPy>=0.3.4",
 ]
 
@@ -25,7 +24,7 @@ dev = [
 ]
 
 [project.scripts]
-postflow = "postflow.main:app"
+vcli = "vcli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]

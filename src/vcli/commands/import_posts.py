@@ -7,15 +7,15 @@ import hashlib
 
 import typer
 
-from postflow.adapters.velog.api import get_current_user, get_user_posts
-from postflow.adapters.velog.auth import check_auth
-from postflow.core.config import load_config
-from postflow.core.registry import add_entry, load_registry, update_entry
-from postflow.models import Meta, PostStatus, ProviderInfo, RegistryEntry, Visibility
-from postflow.utils import logger
-from postflow.utils.fs import read_yaml, write_yaml, write_text
-from postflow.utils.id import generate_id
-from postflow.utils.paths import find_project_root, get_posts_dir
+from vcli.adapters.velog.api import get_current_user, get_user_posts
+from vcli.adapters.velog.auth import check_auth
+from vcli.core.config import load_config
+from vcli.core.registry import add_entry, load_registry, update_entry
+from vcli.models import Meta, PostStatus, ProviderInfo, RegistryEntry, Visibility
+from vcli.utils import logger
+from vcli.utils.fs import read_yaml, write_yaml, write_text
+from vcli.utils.id import generate_id
+from vcli.utils.paths import find_project_root, get_posts_dir
 
 
 def _slugify(text: str) -> str:
@@ -82,7 +82,7 @@ def _download_images(body: str, post_dir: Path) -> str:
             local_path = images_dir / filename
 
             if not local_path.exists():
-                req = Request(url, headers={"User-Agent": "PostFlow/0.1"})
+                req = Request(url, headers={"User-Agent": "unofficial-velog-cli/0.1"})
                 with urlopen(req, timeout=30) as resp:
                     local_path.write_bytes(resp.read())
 
@@ -109,7 +109,7 @@ def sync_posts() -> None:
     root = find_project_root()
 
     if not check_auth():
-        logger.error("Velog에 로그인되어 있지 않습니다. 'postflow login'을 먼저 실행하세요.")
+        logger.error("Velog에 로그인되어 있지 않습니다. 'vcli login'을 먼저 실행하세요.")
         raise typer.Exit(1)
 
     user = get_current_user()
@@ -166,7 +166,7 @@ def sync_posts() -> None:
                 local_mtime = datetime.fromtimestamp(content_path.stat().st_mtime, tz=timezone.utc)
                 if local_mtime > velog_updated:
                     logger.warn(f"  로컬이 더 최신입니다: {title}")
-                    logger.info(f"    Velog에 반영하려면 'postflow publish --slug {existing_entry.slug}'를 사용하세요.")
+                    logger.info(f"    Velog에 반영하려면 'vcli publish --slug {existing_entry.slug}'를 사용하세요.")
                     overwrite = typer.confirm(f"  Velog 내용으로 로컬을 덮어쓸까요?", default=False)
                     if not overwrite:
                         skipped += 1
@@ -210,11 +210,6 @@ def sync_posts() -> None:
         else:
             # 새 글 가져오기
             post_dir = posts_dir / slug
-            if post_dir.exists():
-                logger.info(f"  건너뜀 (디렉토리 존재): {slug}")
-                skipped += 1
-                continue
-
             post_id = generate_id()
             released = post.get("released_at")
             published_at = None
@@ -236,7 +231,8 @@ def sync_posts() -> None:
                 series=series_name,
             )
 
-            post_dir.mkdir(parents=True)
+            if not post_dir.exists():
+                post_dir.mkdir(parents=True)
 
             body = post.get("body", "") or ""
             body = _download_images(body, post_dir)
@@ -286,7 +282,7 @@ def sync_posts() -> None:
     if entries_to_remove:
         registry = load_registry(root)
         registry.posts = [e for e in registry.posts if e.id not in entries_to_remove]
-        from postflow.core.registry import save_registry
+        from vcli.core.registry import save_registry
         save_registry(root, registry)
 
     logger.info("")
