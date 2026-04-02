@@ -102,6 +102,37 @@ def validate_registry(root: Path) -> CheckResult:
             result.add_error(
                 f"[{entry.slug}] 레지스트리에 있지만 디렉토리가 없습니다"
             )
+            continue
+
+        meta_path = post_dir / "meta.yaml"
+        if not meta_path.exists():
+            result.add_error(f"[{entry.slug}] 레지스트리 항목에 대응하는 meta.yaml이 없습니다")
+            continue
+
+        try:
+            meta = Meta(**read_yaml(meta_path))
+        except ValidationError as e:
+            for err in e.errors():
+                field = ".".join(str(loc) for loc in err["loc"])
+                result.add_error(f"[{entry.slug}] meta.yaml 검증 실패 - {field}: {err['msg']}")
+            continue
+
+        if entry.title != meta.title:
+            result.add_warning(
+                f"[{entry.slug}] 레지스트리 title과 meta.yaml title이 다릅니다"
+            )
+        if entry.status != meta.status:
+            result.add_warning(
+                f"[{entry.slug}] 레지스트리 status와 meta.yaml status가 다릅니다"
+            )
+        if entry.visibility != meta.visibility:
+            result.add_warning(
+                f"[{entry.slug}] 레지스트리 visibility와 meta.yaml visibility가 다릅니다"
+            )
+        if entry.series != meta.series:
+            result.add_warning(
+                f"[{entry.slug}] 레지스트리 series와 meta.yaml series가 다릅니다"
+            )
 
     # 파일 시스템에 있지만 레지스트리에 없는 글 찾기
     if posts_dir.exists():

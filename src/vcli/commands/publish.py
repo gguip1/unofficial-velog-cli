@@ -15,6 +15,12 @@ from vcli.utils import logger
 from vcli.utils.paths import find_project_root
 
 
+def _parse_velog_timestamp(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
 def _restore_image_urls(content: str, post_dir) -> str:
     """로컬 이미지 경로를 원본 URL로 되돌린다."""
     import json
@@ -64,16 +70,22 @@ def _publish_entry(root, entry: RegistryEntry, adapter: VelogAdapter) -> bool:
 
     if result.success:
         logger.success(f"  완료: {result.url}")
+        published_at = _parse_velog_timestamp(result.published_at) or datetime.now(timezone.utc)
         update_entry(
             root,
             entry.id,
+            title=meta.title,
+            slug=meta.slug,
+            directory=f"{config.posts_dir}/{meta.slug}",
             status=PostStatus.published,
+            visibility=meta.visibility,
+            series=meta.series,
             provider=ProviderInfo(
                 name="velog",
                 post_id=result.post_id,
                 url=result.url,
             ),
-            last_published_at=datetime.now(timezone.utc),
+            last_published_at=published_at,
         )
         return True
     else:

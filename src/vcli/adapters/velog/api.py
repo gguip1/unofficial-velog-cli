@@ -57,7 +57,7 @@ def get_user_posts(username: str) -> list[dict]:
     query = """query {
         posts(input: { username: "%s" }) {
             id title url_slug tags is_private
-            released_at short_description body
+            released_at updated_at short_description body
             series { id name }
         }
     }""" % username
@@ -78,7 +78,7 @@ def write_post(
     """새 글을 발행한다."""
     query = """mutation WritePost($input: WritePostInput!) {
         writePost(input: $input) {
-            id title url_slug
+            id title url_slug released_at updated_at
         }
     }"""
     variables = {
@@ -115,7 +115,7 @@ def edit_post(
     """기존 글을 수정한다."""
     query = """mutation EditPost($input: EditPostInput!) {
         editPost(input: $input) {
-            id title url_slug
+            id title url_slug released_at updated_at
         }
     }"""
     variables = {

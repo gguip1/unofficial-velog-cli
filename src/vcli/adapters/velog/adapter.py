@@ -20,6 +20,7 @@ class PublishResult:
     success: bool
     post_id: str | None = None
     url: str | None = None
+    published_at: str | None = None
     error: str | None = None
 
 
@@ -44,7 +45,12 @@ class VelogAdapter:
 
             if result:
                 url = f"https://velog.io/@{username}/{result['url_slug']}"
-                return PublishResult(success=True, post_id=result["id"], url=url)
+                return PublishResult(
+                    success=True,
+                    post_id=result["id"],
+                    url=url,
+                    published_at=result.get("updated_at") or result.get("released_at"),
+                )
             return PublishResult(success=False, error="발행 응답이 비어있습니다.")
         except Exception as e:
             return PublishResult(success=False, error=str(e))
@@ -69,7 +75,12 @@ class VelogAdapter:
 
             if result:
                 url = f"https://velog.io/@{username}/{result['url_slug']}"
-                return PublishResult(success=True, post_id=result["id"], url=url)
+                return PublishResult(
+                    success=True,
+                    post_id=result["id"],
+                    url=url,
+                    published_at=result.get("updated_at") or result.get("released_at"),
+                )
             return PublishResult(success=False, error="수정 응답이 비어있습니다.")
         except Exception as e:
             return PublishResult(success=False, error=str(e))

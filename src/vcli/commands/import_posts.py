@@ -18,6 +18,13 @@ from vcli.utils.id import generate_id
 from vcli.utils.paths import find_project_root, get_posts_dir
 
 
+def _resolve_remote_timestamp(post: dict) -> datetime | None:
+    raw = post.get("updated_at") or post.get("released_at")
+    if not raw:
+        return None
+    return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
+
 def _slugify(text: str) -> str:
     text = text.lower().strip()
     text = re.sub(r"[^\w\s-]", "", text)
@@ -153,12 +160,8 @@ def sync_posts() -> None:
         if existing_entry:
             post_dir = posts_dir / existing_entry.slug
 
-            # Velog 수정 일자 확인
-            released = post.get("released_at")
-            if released:
-                velog_updated = datetime.fromisoformat(released.replace("Z", "+00:00"))
-            else:
-                velog_updated = datetime.now(timezone.utc)
+            # Velog 최신 수정 일자 확인
+            velog_updated = _resolve_remote_timestamp(post) or datetime.now(timezone.utc)
 
             # 로컬 파일 수정 시간 vs Velog 수정 시간 비교
             content_path = post_dir / "content.md"
@@ -184,6 +187,11 @@ def sync_posts() -> None:
             if post.get("series"):
                 series_name = post["series"]["name"]
 
+            if existing_entry.slug != slug:
+                logger.warn(
+                    f"  Velog 슬러그와 로컬 디렉토리가 다릅니다: remote={slug}, local={existing_entry.slug}"
+                )
+
             meta_data = {
                 "id": existing_entry.id,
                 "title": title,
@@ -203,6 +211,12 @@ def sync_posts() -> None:
                 title=title,
                 visibility=Visibility.private if post.get("is_private") else Visibility.public,
                 series=series_name,
+                provider=ProviderInfo(
+                    name="velog",
+                    post_id=velog_post_id,
+                    url=f"https://velog.io/@{username}/{slug}",
+                ),
+                last_published_at=velog_updated,
             )
 
             logger.info(f"  업데이트: {title}")
@@ -211,10 +225,7 @@ def sync_posts() -> None:
             # 새 글 가져오기
             post_dir = posts_dir / slug
             post_id = generate_id()
-            released = post.get("released_at")
-            published_at = None
-            if released:
-                published_at = datetime.fromisoformat(released.replace("Z", "+00:00"))
+            published_at = _resolve_remote_timestamp(post)
 
             series_name = None
             if post.get("series"):
